@@ -5,10 +5,14 @@ import { FormEvent, useState } from "react";
 import { v4 as uuid } from "uuid";
 import useSWR from 'swr'
 import fetcher from "@/utils/fetchmessages";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/pages/api/auth/[...nextauth]";
 
+type Props = {
+  session: Awaited<ReturnType<typeof getServerSession>>
+}
 
-
-const ChatInput = () => {
+const ChatInput = ({session}:Props) => {
   const [input, setInput] = useState("");
   const {data:messages, error, mutate } = useSWR('/api/getMessages', fetcher)
 
@@ -25,10 +29,9 @@ const ChatInput = () => {
       id,
       message: messageToSend,
       created_at: Date.now(),
-      username: "Arsene Wenger",
-      profilePic:
-        "https://www.arsenal.com/sites/default/files/styles/large_16x9/public/images/wenger_23.jpg?itok=ZxLuhL4d",
-      email: "jbotoku@gmail.com",
+      username: session?.user?.name!,
+      profilePic:session?.user?.image!,
+      email: session?.user?.email,
     };
 
     const uploadMessageToUpstash = async () => {
@@ -66,6 +69,7 @@ const ChatInput = () => {
       <input
         type="text"
         value={input}
+        disabled={!session}
         onChange={(e) => setInput(e.target.value)}
         placeholder="Enter message here..."
         className="flex-1 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent px-5 py-3 disabled:opacity-50 disabñed:cursor-not-allowed"

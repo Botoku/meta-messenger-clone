@@ -2,9 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import LogoutButton from "./LogoutButton";
+import { getServerSession } from "next-auth";
 
-const Header = () => {
-  const session = false
+const Header = async () => {
+  const session = await getServerSession()
 
   if (session)
     return (
@@ -12,15 +13,14 @@ const Header = () => {
         <div className="flex space-x-2">
           <Image
             className="rounded-full mx-2 object-contain "
-            src="/profile2.jpg"
-            height={10}
+            src={session.user?.image!}            height={10}
             width={50}
             alt="Profile picture"
           />
 
           <div className="">
             <p className="text-blue-400">Logged in as:</p>
-            <p className="font-bold text-lg">Botoku Jyde</p>
+            <p className="font-bold text-lg">{session.user?.name}</p>
           </div>
         </div>
 
